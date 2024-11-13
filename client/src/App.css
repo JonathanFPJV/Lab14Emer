@@ -36,3 +36,12 @@
     transform: rotate(360deg);
   }
 }
+
+.form-switch-lg .form-check-input {
+  width: 3em;
+  height: 1.5em;
+}
+.form-switch-lg .form-check-label {
+  font-size: 1.25em;
+  margin-left: 0.5em;
+}

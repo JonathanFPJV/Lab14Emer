@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { Button, Form, Container, Row, Col, Card } from 'react-bootstrap';
 import './App.css';
 
 const App = () => {
@@ -7,7 +9,7 @@ const App = () => {
   const [ledStatus, setLedStatus] = useState(false);
 
   useEffect(() => {
-    const socket = new WebSocket('http://192.168.2.24:8080');
+    const socket = new WebSocket('ws://192.168.2.24:8080');
 
     socket.onopen = () => {
       console.log('Conectado al servidor WebSocket');
@@ -36,7 +38,7 @@ const App = () => {
     if (ws) {
       const newStatus = ledStatus ? 'OFF' : 'ON';
       ws.send(newStatus);
-      ledStatus ? setLedStatus(false) : setLedStatus(true);
+      setLedStatus(!ledStatus);
     }
   };
 
@@ -47,27 +49,46 @@ const App = () => {
   };
 
   return (
-    <div className='App'>
-      <header>
+    <Container className='App'>
+      <header className='my-4'>
         <h1>Control del ESP32</h1>
       </header>
       <main>
-        <div className='widget'>
-          <p>El LED está: {ledStatus}</p>
-          <div className='toggle'>
-            <input type='checkbox' id='green' onClick={toggleLed} checked={ledStatus} />
-            <label for='green'></label>
-          </div>
-        </div>
-        <div className='widget'>
-          <button onClick={getPotValue}>Leer Potenciómetro</button>
-          <p>Valor del Potenciómetro:</p>
-          {potValue !== null && (
-            <h1>{potValue}</h1>
-          )}
-        </div>
+        <Row className='mb-4'>
+          <Col>
+            <Card>
+              <Card.Body>
+                <Card.Title>Control del LED</Card.Title>
+                <p>El LED está: {ledStatus ? 'Encendido' : 'Apagado'}</p>
+                <Form>
+                  <Form.Check
+                    type="switch"
+                    id="led-switch"
+                    label="Encender/Apagar LED"
+                    checked={ledStatus}
+                    onChange={toggleLed}
+                  />
+                </Form>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <Card>
+              <Card.Body>
+                <Card.Title>Lectura del Potenciómetro</Card.Title>
+                <Button onClick={getPotValue}>Leer Potenciómetro</Button>
+                <p className='mt-3'>Valor del Potenciómetro:</p>
+                {potValue !== null && (
+                  <h3>{potValue}</h3>
+                )}
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
       </main>
-    </div>
+    </Container>
   );
 };
 
