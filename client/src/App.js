@@ -7,7 +7,7 @@ const App = () => {
   const [ledStatus, setLedStatus] = useState(false);
 
   useEffect(() => {
-    const socket = new WebSocket('ws://172.16.3.198:8080');
+    const socket = new WebSocket('http://192.168.2.24:8080');
 
     socket.onopen = () => {
       console.log('Conectado al servidor WebSocket');
@@ -53,10 +53,10 @@ const App = () => {
       </header>
       <main>
         <div className='widget'>
-          <p>El LED está: {ledStatus ? 'Encendido' : 'Apagado'}</p>
+          <p>El LED está: {ledStatus}</p>
           <div className='toggle'>
             <input type='checkbox' id='green' onClick={toggleLed} checked={ledStatus} />
-            <label htmlFor='green'></label>
+            <label for='green'></label>
           </div>
         </div>
         <div className='widget'>
