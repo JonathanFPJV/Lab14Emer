@@ -2,7 +2,7 @@ const WebSocket = require('ws');
 const mongoose = require('mongoose');
 
 // Conectar a MongoDB
-mongoose.connect('mongodb+srv://esp32_user:esp32_pass@esp32-cluster.lldxu.mongodb.net/?retryWrites=true&w=majority&appName=ESP32-Cluster', { });
+mongoose.connect('mongodb+srv://esp32_user:esp32_pass@esp32-cluster.lldxu.mongodb.net/?retryWrites=true&w=majority&appName=ESP32-Cluster', {});
 
 // POTENCIOMETRO: Esquema y Modelo
 const potSchema = new mongoose.Schema({
@@ -13,7 +13,8 @@ const Potenciometro = mongoose.model('Potenciometro', potSchema);
 
 // LED: Esquema y Modelo
 const ledSchema = new mongoose.Schema({
-    estado: String,  // "ON" o "OFF"
+    led: Number,           // Número del LED (1 o 2)
+    estado: String,        // "ON" o "OFF"
     timestamp: { type: Date, default: Date.now },
 });
 const Led = mongoose.model('Led', ledSchema);
@@ -33,20 +34,27 @@ wss.on('connection', (ws) => {
             esp32Socket = ws;
             console.log('ESP32 conectado');
         }
-        else if (message === 'ON' || message === 'OFF' || message === 'GET_POT') {
+        else if (message === 'ON' || message === 'OFF' || message === 'LED2_ON' || message === 'LED2_OFF' || message === 'GET_POT') {
             if (esp32Socket) {
                 esp32Socket.send(message);
                 console.log(`Comando enviado al ESP32: ${message}`);
+
+                // Guardar estado del LED en la base de datos
                 if (message === 'ON' || message === 'OFF') {
-                    const nuevoEstadoLED = new Led({ estado: message });
-                    await nuevoEstadoLED.save();
-                    console.log(`Estado del LED guardado en DB: ${message}`);
+                    const nuevoEstadoLED1 = new Led({ led: 1, estado: message });
+                    await nuevoEstadoLED1.save();
+                    console.log(`Estado del LED 1 guardado en DB: ${message}`);
+                } else if (message === 'LED2_ON' || message === 'LED2_OFF') {
+                    const estadoLED2 = message === 'LED2_ON' ? 'ON' : 'OFF';
+                    const nuevoEstadoLED2 = new Led({ led: 2, estado: estadoLED2 });
+                    await nuevoEstadoLED2.save();
+                    console.log(`Estado del LED 2 guardado en DB: ${estadoLED2}`);
                 }
             } else {
                 console.log('ESP32 no está conectado');
             }
         }
-        // Cambiar a la condición else if para manejar valores de potenciómetro en formato correcto
+        // Manejo de valores de potenciómetro
         else if (message.startsWith("POT:")) {
             const potValue = parseInt(message.split(':')[1], 10);
             if (!isNaN(potValue)) {
